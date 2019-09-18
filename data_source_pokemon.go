@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mtslzr/pokeapi-go"
+	"github.com/mtslzr/pokeapi-go/structs"
 )
 
 func dataSourcePokemon() *schema.Resource {
@@ -26,7 +28,7 @@ func dataSourcePokemon() *schema.Resource {
 			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"order": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -42,11 +44,11 @@ func dataSourcePokemon() *schema.Resource {
 
 func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
-	resp, err := pokeapi.Pokemon(name)
-	log.Printf("Response: %v", resp.ID)
-	if err != nil {
-		d.SetId("")
-		return err
+	var resp structs.Pokemon
+	if name == "" {
+		resp = randomPokemon()
+	} else {
+		resp, _ = pokeapi.Pokemon(name)
 	}
 	d.SetId(strconv.Itoa(resp.ID))
 	d.Set("base_experience", resp.BaseExperience)
@@ -57,4 +59,16 @@ func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("weight", resp.Weight)
 
 	return nil
+}
+
+func randomPokemon() structs.Pokemon {
+	id := rand.Intn(807)
+	if id == 0 {
+		randomPokemon()
+	}
+	resp, err := pokeapi.Pokemon(strconv.Itoa(id))
+	if err != nil {
+		log.Fatalf("Error getting random Pokemon: %v", err)
+	}
+	return resp
 }
