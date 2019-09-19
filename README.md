@@ -8,8 +8,18 @@ data "pokemon" "ditto" {
     name = "ditto"
 }
 
-# You can also get a random Pokemon from number 1 - 807, just leave the fields empty
-data "pokemon" "random" {
+# You can also get a Pokemon by number from 1 - 807
+data "pokemon" "bulbasaur" {
+    id = 1
+}
 
+# Want to get a random Pokemon? Use the random provider!
+resource "random_integer" "pokemon_id" {
+    min = 1
+    max = 807
+}
+
+data "pokemon" "random" {
+    id = random_integer.pokemon_id.result
 }
 ```

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-	"math/rand"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -16,27 +14,33 @@ func dataSourcePokemon() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"base_experience": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
+				Computed: true,
 			},
 			"height": &schema.Schema{
 				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"id": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
 				Optional: true,
 			},
 			"is_default": &schema.Schema{
 				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"order": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
+				Computed: true,
 			},
 			"weight": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -44,12 +48,19 @@ func dataSourcePokemon() *schema.Resource {
 
 func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
+	id := strconv.Itoa(d.Get("id").(int))
+
 	var resp structs.Pokemon
-	if name == "" {
-		resp = randomPokemon()
-	} else {
+
+	if name != "" {
 		resp, _ = pokeapi.Pokemon(name)
+	} else if id != "" {
+		resp, _ = pokeapi.Pokemon(id)
+	} else {
+		d.SetId("")
+		return nil
 	}
+
 	d.SetId(strconv.Itoa(resp.ID))
 	d.Set("base_experience", resp.BaseExperience)
 	d.Set("height", resp.Height)
@@ -59,16 +70,4 @@ func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("weight", resp.Weight)
 
 	return nil
-}
-
-func randomPokemon() structs.Pokemon {
-	id := rand.Intn(807)
-	if id == 0 {
-		randomPokemon()
-	}
-	resp, err := pokeapi.Pokemon(strconv.Itoa(id))
-	if err != nil {
-		log.Fatalf("Error getting random Pokemon: %v", err)
-	}
-	return resp
 }
