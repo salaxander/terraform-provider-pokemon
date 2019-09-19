@@ -5,16 +5,16 @@ data "pokemon" "ditto" {
 }
 
 data "pokemon" "bulbasaur" {
-    id = 1
+    number = 1
 }
 
-resource "random_integer" "pokemon_id" {
+resource "random_integer" "pokemon_number" {
     min = 1
     max = 807
 }
 
 data "pokemon" "random" {
-    id = random_integer.pokemon_id.result
+    number = random_integer.pokemon_number.result
 }
 
 ### OUTPUT ###

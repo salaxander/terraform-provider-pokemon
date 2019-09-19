@@ -20,11 +20,6 @@ func dataSourcePokemon() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"id": &schema.Schema{
-				Type:     schema.TypeInt,
-				Computed: true,
-				Optional: true,
-			},
 			"is_default": &schema.Schema{
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -33,6 +28,11 @@ func dataSourcePokemon() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"number": &schema.Schema{
+				Type:     schema.TypeInt,
+				Computed: true,
+				Optional: true,
 			},
 			"order": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -48,14 +48,14 @@ func dataSourcePokemon() *schema.Resource {
 
 func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
-	id := strconv.Itoa(d.Get("id").(int))
+	number := strconv.Itoa(d.Get("number").(int))
 
 	var resp structs.Pokemon
 
 	if name != "" {
 		resp, _ = pokeapi.Pokemon(name)
-	} else if id != "" {
-		resp, _ = pokeapi.Pokemon(id)
+	} else if number != "" {
+		resp, _ = pokeapi.Pokemon(number)
 	} else {
 		d.SetId("")
 		return nil
@@ -66,6 +66,7 @@ func dataSourcePokemonRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("height", resp.Height)
 	d.Set("is_default", resp.IsDefault)
 	d.Set("name", resp.Name)
+	d.Set("number", resp.ID)
 	d.Set("order", resp.Order)
 	d.Set("weight", resp.Weight)
 
